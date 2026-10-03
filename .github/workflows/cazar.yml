@@ -5,6 +5,11 @@ on:
     - cron: '*/30 * * * *'
   workflow_dispatch:
 
+# Evita que se amontonen ejecuciones paralelas y bloqueen el Stack
+concurrency:
+  group: cazar-oracle
+  cancel-in-progress: false
+
 permissions:
   actions: write
   contents: read
@@ -39,11 +44,11 @@ jobs:
         run: |
           STACK_ID="ocid1.ormstack.oc1.sa-bogota-1.amaaaaaaxrasalaafrnqcyzh2d6mx7vusyk3duaum7qtv4sztrj7iz3adsxa"
           
-          # Realiza 60 intentos seguidos (~30 minutos continuos)
+          # 60 intentos consecutivos (~20-25 minutos continuos)
           for i in {1..60}; do
             TIMESTAMP=$(date '+%Y%m%d%H%M%S')
             echo "=========================================="
-            echo "Intento $i/60 - [$(date '+%H:%M:%S')] Probando cupo en Bogotá..."
+            echo "Intento $i/60 - [$(date '+%H:%M:%S')] Probando cupo en Bogotá (2 OCPU / 12 GB)..."
             
             JOB_OUTPUT=$(oci resource-manager job create-apply-job \
               --stack-id "$STACK_ID" \
